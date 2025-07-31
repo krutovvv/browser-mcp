@@ -37,8 +37,6 @@ docker run -d \
 
 ## 🧱 Architecture
 
-![Architecture Diagram](https://via.placeholder.com/600x400?text=Chrome+Automation+Stack)
-
 The workspace includes:
 
 1. **Xvfb** - Virtual display server
