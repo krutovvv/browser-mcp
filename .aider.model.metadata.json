@@ -1,0 +1,20 @@
+{
+  "openai/Qwen3-32B-AWQ": {
+    "max_tokens": 32768,
+    "max_input_tokens": 32768,
+    "max_output_tokens": 4096,
+    "input_cost_per_token": 0.000001,
+    "output_cost_per_token": 0.000003,
+    "litellm_provider": "openai",
+    "mode": "chat"
+  },
+  "openai/Phi-4-14B-AWQ": {
+    "max_tokens": 8192,
+    "max_input_tokens": 8192,
+    "max_output_tokens": 2048,
+    "input_cost_per_token": 0.0000005,
+    "output_cost_per_token": 0.0000015,
+    "litellm_provider": "openai",
+    "mode": "chat"
+  }
+}

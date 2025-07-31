@@ -1,0 +1,5 @@
+.zed
+tsconfig.json
+tests
+node_modules
+eslint.config.cjs
