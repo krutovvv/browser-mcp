@@ -1,4 +1,4 @@
-# Coder Chrome Automation Workspace
+# Coder Chrome Automation and MCP
 
 Provision a Coder workspace with headless Chrome browser, CDP proxy, and noVNC interface for browser automation and monitoring.
 
