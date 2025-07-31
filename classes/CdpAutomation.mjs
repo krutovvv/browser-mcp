@@ -1,4 +1,4 @@
-import sharp from 'sharp'
+import sharp from "sharp";
 
 // CdpAutomation.mjs
 let currentMouseX = 0;
@@ -9,12 +9,12 @@ export class CdpAutomation {
 
   /**
    * Создает новый экземпляр CdpAutomation.
-   * @param {string} cdpEndpoint URL-адрес конечной точки CDP (например, "http://192.168.88.100:9223").
+   * @param {string} cdpEndpoint URL-адрес конечной точки CDP (например, "http://localhost:9223").
    */
   constructor(cdpEndpoint) {
     if (!cdpEndpoint) {
       throw new Error(
-        "CDP Endpoint must be provided to CdpAutomation constructor.",
+        "CDP Endpoint must be provided to CdpAutomation constructor."
       );
     }
     this.#cdpEndpoint = cdpEndpoint;
@@ -63,9 +63,12 @@ export class CdpAutomation {
         returnByValue: true,
       });
 
-      if (result.value < 250) { // 250 байт - произвольное "маленькое" значение
-        console.log("⏳ Body content is small, waiting for potential SPA render...");
-        await new Promise(resolve => setTimeout(resolve, 3000)); // Дополнительное ожидание 3 сек
+      if (result.value < 250) {
+        // 250 байт - произвольное "маленькое" значение
+        console.log(
+          "⏳ Body content is small, waiting for potential SPA render..."
+        );
+        await new Promise((resolve) => setTimeout(resolve, 3000)); // Дополнительное ожидание 3 сек
       }
     })();
 
@@ -74,7 +77,15 @@ export class CdpAutomation {
       await Promise.race([
         Promise.all([navigationPromise, loadPromise]),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error(`Navigation to ${url} timed out after ${timeout / 1000}s`)), timeout)
+          setTimeout(
+            () =>
+              reject(
+                new Error(
+                  `Navigation to ${url} timed out after ${timeout / 1000}s`
+                )
+              ),
+            timeout
+          )
         ),
       ]);
       console.log(`✅ Успешно перешли на ${url} и страница загружена.`);
@@ -82,13 +93,15 @@ export class CdpAutomation {
       console.error(`❌ Ошибка навигации на ${url}:`, error.message);
       // Если это таймаут, считаем навигацию условно успешной, но выводим предупреждение.
       if (error.message.includes("timed out")) {
-        console.warn(`⚠️ Навигация завершилась по таймауту, но переход мог произойти. Продолжаем выполнение.`);
+        console.warn(
+          `⚠️ Навигация завершилась по таймауту, но переход мог произойти. Продолжаем выполнение.`
+        );
         return;
       }
       throw error;
     }
   }
-  
+
   // Остальные методы класса CdpAutomation остаются без изменений,
   // так как их доработка зависит от параметров, передаваемых из InteractiveElementSelector.
   // ... (waitForElement, clickElement, typeText, scrollPage, getCookiesCdp, getLocalStorageCdp, takeScreenshotBase64)
@@ -101,7 +114,7 @@ export class CdpAutomation {
    */
   async waitForElement(selector, timeout = 5000) {
     console.log(
-      `⏳ Ожидание элемента с селектором "${selector}" (таймаут: ${timeout}мс)...`,
+      `⏳ Ожидание элемента с селектором "${selector}" (таймаут: ${timeout}мс)...`
     );
     const startTime = Date.now();
     while (Date.now() - startTime < timeout) {
@@ -144,10 +157,14 @@ export class CdpAutomation {
       clickCount = 1, // ADDED
     } = options;
 
-    console.log(`🖱️ Клик${clickCount > 1 ? ` (${clickCount}x)` : ''} по элементу с селектором "${selector}"...`);
+    console.log(
+      `🖱️ Клик${clickCount > 1 ? ` (${clickCount}x)` : ""} по элементу с селектором "${selector}"...`
+    );
     try {
       // Получаем nodeId текущего документа динамически
-      const { root: { nodeId: documentNodeId } } = await this.cdpRequest('DOM.getDocument');
+      const {
+        root: { nodeId: documentNodeId },
+      } = await this.cdpRequest("DOM.getDocument");
 
       const { nodeId } = await this.cdpRequest("DOM.querySelector", {
         nodeId: documentNodeId, // Используем динамически полученный nodeId документа
@@ -164,7 +181,7 @@ export class CdpAutomation {
 
       if (!model) {
         throw new Error(
-          `Не удалось получить модель коробки для элемента "${selector}".`,
+          `Не удалось получить модель коробки для элемента "${selector}".`
         );
       }
 
@@ -187,8 +204,8 @@ export class CdpAutomation {
         setTimeout(
           resolve,
           Math.random() * (preClickDelayMax - preClickDelayMin) +
-            preClickDelayMin,
-        ),
+            preClickDelayMin
+        )
       );
 
       await this.cdpRequest("Input.dispatchMouseEvent", {
@@ -203,8 +220,8 @@ export class CdpAutomation {
         setTimeout(
           resolve,
           Math.random() * (pressReleaseDelayMax - pressReleaseDelayMin) +
-            pressReleaseDelayMin,
-        ),
+            pressReleaseDelayMin
+        )
       );
 
       await this.cdpRequest("Input.dispatchMouseEvent", {
@@ -214,7 +231,9 @@ export class CdpAutomation {
         button: "left",
         clickCount: clickCount,
       });
-      console.log(`✅ Успешно кликнули${clickCount > 1 ? ` (${clickCount}x)` : ''} по "${selector}".`);
+      console.log(
+        `✅ Успешно кликнули${clickCount > 1 ? ` (${clickCount}x)` : ""} по "${selector}".`
+      );
     } catch (error) {
       console.error(`❌ Ошибка при клике по "${selector}":`, error.message);
       throw error;
@@ -242,8 +261,8 @@ export class CdpAutomation {
         await new Promise((resolve) =>
           setTimeout(
             resolve,
-            Math.random() * (charDelayMax - charDelayMin) + charDelayMin,
-          ),
+            Math.random() * (charDelayMax - charDelayMin) + charDelayMin
+          )
         );
       }
       console.log(`✅ Текст успешно введен.`);
@@ -253,9 +272,9 @@ export class CdpAutomation {
     }
   }
 
-  JavaScript
-// CdpAutomation.mjs
-// ... (начало файла, импорты, currentMouseX, currentMouseY, CdpAutomation constructor)
+  JavaScript;
+  // CdpAutomation.mjs
+  // ... (начало файла, импорты, currentMouseX, currentMouseY, CdpAutomation constructor)
 
   // ... (методы cdpRequest, navigate, waitForElement, clickElement, typeText)
 
@@ -282,15 +301,17 @@ export class CdpAutomation {
       const viewportHeight = layoutViewport.clientHeight;
       const viewportWidth = layoutViewport.clientWidth;
 
-      const { result: scrollResult } = await this.cdpRequest("Runtime.evaluate", {
+      const { result: scrollResult } = await this.cdpRequest(
+        "Runtime.evaluate",
+        {
           expression: `JSON.stringify({
               scrollY: window.scrollY,
               scrollHeight: document.documentElement.scrollHeight
           })`,
           returnByValue: true,
-      });
+        }
+      );
       const { scrollY, scrollHeight } = JSON.parse(scrollResult.value);
-
 
       if (scrollAmount === "screenDown") {
         scrollAmount = viewportHeight;
@@ -303,11 +324,11 @@ export class CdpAutomation {
           return;
         }
       } else if (scrollAmount === "start") {
-          scrollAmount = -scrollY;
-          if (scrollAmount === 0) {
-              console.log("Страница уже в начале.");
-              return;
-          }
+        scrollAmount = -scrollY;
+        if (scrollAmount === 0) {
+          console.log("Страница уже в начале.");
+          return;
+        }
       }
 
       let totalScrolled = 0;
@@ -333,8 +354,8 @@ export class CdpAutomation {
           setTimeout(
             resolve,
             Math.random() * (delayPerTickMax - delayPerTickMin) +
-              delayPerTickMin,
-          ),
+              delayPerTickMin
+          )
         );
       }
       console.log(`✅ Прокрутка завершена.`);
@@ -351,17 +372,17 @@ export class CdpAutomation {
    */
   async getCookiesCdp(domain) {
     console.log(
-      `🍪 Извлечение куки ${domain ? `для домена "${domain}"` : "всех куки"}...`,
+      `🍪 Извлечение куки ${domain ? `для домена "${domain}"` : "всех куки"}...`
     );
     try {
       const { cookies } = await this.cdpRequest("Network.getCookies");
 
       if (domain) {
         const filteredCookies = cookies.filter((cookie) =>
-          cookie.domain.includes(domain),
+          cookie.domain.includes(domain)
         );
         console.log(
-          `✅ Отфильтровано ${filteredCookies.length} куки для домена "${domain}".`,
+          `✅ Отфильтровано ${filteredCookies.length} куки для домена "${domain}".`
         );
         return filteredCookies;
       }
@@ -378,40 +399,47 @@ export class CdpAutomation {
    * @returns {Promise<Array<Array<string>>>} Массив массивов [ключ, значение] из localStorage.
    */
   async getLocalStorageCdp() {
-    console.log(
-      `💾 Извлечение данных из localStorage для текущего домена...`,
-    );
+    console.log(`💾 Извлечение данных из localStorage для текущего домена...`);
     try {
-        await this.cdpRequest("DOMStorage.enable");
-        const { result: { value: securityOrigin } } = await this.cdpRequest("Runtime.evaluate", {
-            expression: "window.location.origin",
-            returnByValue: true,
-        });
+      await this.cdpRequest("DOMStorage.enable");
+      const {
+        result: { value: securityOrigin },
+      } = await this.cdpRequest("Runtime.evaluate", {
+        expression: "window.location.origin",
+        returnByValue: true,
+      });
 
-        if (!securityOrigin) {
-            await this.cdpRequest("DOMStorage.disable");
-            throw new Error("Could not determine the security origin of the page.");
-        }
-
-        const { items } = await this.cdpRequest("DOMStorage.getDOMStorageItems", {
-            storageId: { securityOrigin: securityOrigin, isLocalStorage: true },
-        });
-
-        console.log(`✅ Извлечено ${items.length} элементов из localStorage для ${securityOrigin}.`);
+      if (!securityOrigin) {
         await this.cdpRequest("DOMStorage.disable");
-        return items;
+        throw new Error("Could not determine the security origin of the page.");
+      }
+
+      const { items } = await this.cdpRequest("DOMStorage.getDOMStorageItems", {
+        storageId: { securityOrigin: securityOrigin, isLocalStorage: true },
+      });
+
+      console.log(
+        `✅ Извлечено ${items.length} элементов из localStorage для ${securityOrigin}.`
+      );
+      await this.cdpRequest("DOMStorage.disable");
+      return items;
     } catch (error) {
-        console.error("❌ Ошибка при извлечении данных из localStorage:", error.message);
-        // Убедимся, что DOMStorage отключается даже в случае ошибки
-        try {
-            await this.cdpRequest("DOMStorage.disable");
-        } catch (disableError) {
-            console.error("Failed to disable DOMStorage on error:", disableError.message);
-        }
-        return [];
+      console.error(
+        "❌ Ошибка при извлечении данных из localStorage:",
+        error.message
+      );
+      // Убедимся, что DOMStorage отключается даже в случае ошибки
+      try {
+        await this.cdpRequest("DOMStorage.disable");
+      } catch (disableError) {
+        console.error(
+          "Failed to disable DOMStorage on error:",
+          disableError.message
+        );
+      }
+      return [];
     }
   }
-
 
   /**
    * Делает скриншот текущей страницы и возвращает его в формате Base64.
@@ -422,49 +450,65 @@ export class CdpAutomation {
    */
   async takeScreenshotBase64(format = "jpeg", quality = 80) {
     console.log(
-      `📸 Делаем скриншот страницы в формате ${format.toUpperCase()} и обрабатываем его (max 1024px width, quality ${quality})...`, // LOG MODIFIED
+      `📸 Делаем скриншот страницы в формате ${format.toUpperCase()} и обрабатываем его (max 1024px width, quality ${quality})...` // LOG MODIFIED
     );
     try {
       // 1. Получаем необработанный скриншот из CDP (без указания качества или формата, sharp это сделает)
       const cdpParams = {
-        format: 'png', // Всегда запрашиваем PNG для наилучшего качества для sharp
+        format: "png", // Всегда запрашиваем PNG для наилучшего качества для sharp
         encoding: "base64",
       };
-      const { data } = await this.cdpRequest("Page.captureScreenshot", cdpParams);
+      const { data } = await this.cdpRequest(
+        "Page.captureScreenshot",
+        cdpParams
+      );
 
       // 2. Преобразуем Base64 в буфер для Sharp
-      const imageBuffer = Buffer.from(data, 'base64');
+      const imageBuffer = Buffer.from(data, "base64");
 
       let processedImageBuffer;
       let sharpInstance = sharp(imageBuffer);
 
       // 3. Изменяем размер пропорционально до 1024px по ширине
-      sharpInstance = sharpInstance.resize({ width: 1024, fit: 'inside' });
+      sharpInstance = sharpInstance.resize({ width: 1024, fit: "inside" });
 
       // 4. Устанавливаем формат и качество
       switch (format) {
-        case 'jpeg':
-          processedImageBuffer = await sharpInstance.jpeg({ quality: quality }).toBuffer();
+        case "jpeg":
+          processedImageBuffer = await sharpInstance
+            .jpeg({ quality: quality })
+            .toBuffer();
           break;
-        case 'webp':
-          processedImageBuffer = await sharpInstance.webp({ quality: quality }).toBuffer();
+        case "webp":
+          processedImageBuffer = await sharpInstance
+            .webp({ quality: quality })
+            .toBuffer();
           break;
-        case 'png': // PNG не использует качество, но мы все равно пропускаем его через sharp для ресайза
+        case "png": // PNG не использует качество, но мы все равно пропускаем его через sharp для ресайза
           processedImageBuffer = await sharpInstance.png().toBuffer();
           break;
         default:
-          console.warn(`Неизвестный формат изображения "${format}". Используем 'jpeg'.`);
-          processedImageBuffer = await sharpInstance.jpeg({ quality: quality }).toBuffer();
-          format = 'jpeg'; // Обновим формат для лога
+          console.warn(
+            `Неизвестный формат изображения "${format}". Используем 'jpeg'.`
+          );
+          processedImageBuffer = await sharpInstance
+            .jpeg({ quality: quality })
+            .toBuffer();
+          format = "jpeg"; // Обновим формат для лога
       }
 
       // 5. Преобразуем обработанный буфер обратно в Base64
-      const processedBase64 = processedImageBuffer.toString('base64');
+      const processedBase64 = processedImageBuffer.toString("base64");
 
-      console.log(`✅ Скриншот успешно сделан и обработан в формате ${format.toUpperCase()}.`);
+      console.log(
+        `✅ Скриншот успешно сделан и обработан в формате ${format.toUpperCase()}.`
+      );
       return processedBase64;
     } catch (error) {
-      console.error("❌ Ошибка при создании или обработке скриншота:", error.message); // LOG MODIFIED
+      console.error(
+        "❌ Ошибка при создании или обработке скриншота:",
+        error.message
+      ); // LOG MODIFIED
       return null;
     }
   }
@@ -475,30 +519,31 @@ export class CdpAutomation {
    * @returns {Promise<void>}
    */
   async pressKey(keyName) {
-
     let keyData = {
       key: keyName,
-      text: '',
-      code: '',
+      text: "",
+      code: "",
       windowsVirtualKeyCode: 0,
     };
 
     switch (keyName) {
-      case 'Enter':
-        keyData.code = 'Enter';
+      case "Enter":
+        keyData.code = "Enter";
         keyData.windowsVirtualKeyCode = 13;
         break;
-      case 'Escape':
-        keyData.code = 'Escape';
+      case "Escape":
+        keyData.code = "Escape";
         keyData.windowsVirtualKeyCode = 27;
         break;
-      case 'Backspace':
-        keyData.code = 'Backspace';
+      case "Backspace":
+        keyData.code = "Backspace";
         keyData.windowsVirtualKeyCode = 8;
         break;
       default:
         keyData.text = keyName;
-        console.warn(`⌨️ Попытка нажать неизвестную клавишу: '${keyName}'. Использование параметров события клавиши по умолчанию.`);
+        console.warn(
+          `⌨️ Попытка нажать неизвестную клавишу: '${keyName}'. Использование параметров события клавиши по умолчанию.`
+        );
     }
 
     try {
@@ -510,7 +555,7 @@ export class CdpAutomation {
       });
 
       // Optional: Add a small delay between key down and key up for more realism
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       // Key Up event
       await this.cdpRequest("Input.dispatchKeyEvent", {
@@ -537,10 +582,13 @@ export class CdpAutomation {
       await this.clickElement(selector, { clickCount: 3 });
 
       // Press Backspace to delete selected content
-      await this.pressKey('Backspace');
+      await this.pressKey("Backspace");
       console.log(`✅ Поле ввода с селектором "${selector}" успешно очищено.`);
     } catch (error) {
-      console.error(`❌ Ошибка при очистке поля ввода "${selector}":`, error.message);
+      console.error(
+        `❌ Ошибка при очистке поля ввода "${selector}":`,
+        error.message
+      );
       throw error;
     }
   }

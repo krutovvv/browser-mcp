@@ -105,18 +105,6 @@ curl -X POST http://localhost:9223 \
 options.add_argument('--load-extension=/home/chrome/extensions/your-extension')
 ```
 
-## 📦 File Structure
-
-```
-workspace/
-├── Dockerfile            # Base image configuration
-├── init_chrome.py        # Main browser initialization script
-├── supervisord.conf      # Process management configuration
-└── /home/chrome/
-    ├── profile/          # Persistent browser profile
-    └── extensions/       # Optional browser extensions
-```
-
 ## 🧪 Testing the Setup
 
 1. Start the container

@@ -4,7 +4,7 @@ import { McpServer } from "./classes/McpServer.mjs";
 
 // Define your CDP endpoint
 // Теперь читаем CDP_ENDPOINT из переменной окружения, или используем значение по умолчанию
-const CDP_ENDPOINT = process.env.CDP_ENDPOINT || "http://192.168.88.100:9223";
+const CDP_ENDPOINT = process.env.CDP_ENDPOINT || "http://localhost:9223";
 const MCP_SERVER_PORT = process.env.MCP_SERVER_PORT
   ? parseInt(process.env.MCP_SERVER_PORT)
   : 3000;
@@ -17,7 +17,7 @@ async function startMcpServer() {
   try {
     await mcpServer.start();
     console.log(
-      "MCP Server is running via SDK on HTTP. You can now send HTTP requests to interact with the browser.",
+      "MCP Server is running via SDK on HTTP. You can now send HTTP requests to interact with the browser."
     );
     console.log(`CDP Endpoint in use: ${CDP_ENDPOINT}`);
     console.log(`MCP Server Port: ${MCP_SERVER_PORT}`);

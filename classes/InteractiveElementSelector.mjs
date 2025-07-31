@@ -8,7 +8,7 @@ export class InteractiveElementSelector extends CdpAutomation {
 
   /**
    * Создает новый экземпляр InteractiveElementSelector.
-   * @param {string} cdpEndpoint URL-адрес конечной точки CDP (например, "http://192.168.88.100:31091").
+   * @param {string} cdpEndpoint URL-адрес конечной точки CDP (например, "http://localhost:31091").
    */
   constructor(cdpEndpoint) {
     super(cdpEndpoint); // Вызываем конструктор родительского класса CdpAutomation
