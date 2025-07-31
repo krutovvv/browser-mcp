@@ -4,3 +4,5 @@ tests
 node_modules
 eslint.config.cjs
 *aider*
+bookmarklets
+misc

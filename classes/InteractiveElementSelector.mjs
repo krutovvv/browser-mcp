@@ -19,7 +19,7 @@ export class InteractiveElementSelector extends CdpAutomation {
    * для конкретного элемента через Runtime.callFunctionOn.
    * this здесь будет ссылаться на DOM-элемент.
    */
-  #visibilityCheckScript = `
+  #visibilityCheckScript = /* js */ `
     function() {
       const el = this;
       const rect = el.getBoundingClientRect();
@@ -265,7 +265,6 @@ export class InteractiveElementSelector extends CdpAutomation {
     }
   `;
 
-
   /**
    * Находит интерактивные и видимые элементы на странице, нумерует их,
    * сохраняет селекторы и возвращает отформатированный список.
@@ -277,20 +276,38 @@ export class InteractiveElementSelector extends CdpAutomation {
     this.#mappedElements.clear();
     this.#elementCounter = 1;
 
-    console.log(`🔍 Поиск интерактивных элементов (Фильтр: ${filterBySelector}, Скрытые: ${includeHidden})...`);
+    console.log(
+      `🔍 Поиск интерактивных элементов (Фильтр: ${filterBySelector}, Скрытые: ${includeHidden})...`
+    );
 
     const baseInteractiveSelectors = [
-      "a[href]", "button", 'input:not([type="hidden"])', "textarea",
-      "select", "[onclick]", '[role="button"]', '[role="link"]',
-      '[role="checkbox"]', '[role="radio"]', '[role="tab"]',
-      '[role="menuitem"]', '[contenteditable="true"]', '[tabindex]:not([tabindex="-1"])', 'label[for]'
+      "a[href]",
+      "button",
+      'input:not([type="hidden"])',
+      "textarea",
+      "select",
+      "[onclick]",
+      '[role="button"]',
+      '[role="link"]',
+      '[role="checkbox"]',
+      '[role="radio"]',
+      '[role="tab"]',
+      '[role="menuitem"]',
+      '[contenteditable="true"]',
+      '[tabindex]:not([tabindex="-1"])',
+      "label[for]",
     ];
 
-    const finalSelector = (filterBySelector && filterBySelector.toUpperCase() !== 'ANY')
-      ? baseInteractiveSelectors.map(s => `${s}${filterBySelector}`).join(',')
-      : baseInteractiveSelectors.join(',');
+    const finalSelector =
+      filterBySelector && filterBySelector.toUpperCase() !== "ANY"
+        ? baseInteractiveSelectors
+            .map((s) => `${s}${filterBySelector}`)
+            .join(",")
+        : baseInteractiveSelectors.join(",");
 
-    const { root: { nodeId: documentNodeId } } = await this.cdpRequest("DOM.getDocument", { depth: -1 });
+    const {
+      root: { nodeId: documentNodeId },
+    } = await this.cdpRequest("DOM.getDocument", { depth: -1 });
     const { nodeIds } = await this.cdpRequest("DOM.querySelectorAll", {
       nodeId: documentNodeId,
       selector: finalSelector,
@@ -311,10 +328,13 @@ export class InteractiveElementSelector extends CdpAutomation {
           awaitPromise: true,
         });
 
-        if (!includeHidden && (!evalResult?.result?.value?.isVisible || evalResult.exceptionDetails)) {
+        if (
+          !includeHidden &&
+          (!evalResult?.result?.value?.isVisible || evalResult.exceptionDetails)
+        ) {
           continue;
         }
-        
+
         const elInfo = evalResult.result.value;
         if (!elInfo) continue; // Пропускаем, если скрипт не вернул информацию
 
@@ -332,7 +352,6 @@ export class InteractiveElementSelector extends CdpAutomation {
         }
         output += ` (Селектор: ${elInfo.selector})\n`;
         foundCount++;
-
       } catch (error) {
         console.warn(`Error processing node ${nodeId}:`, error.message);
       }
@@ -352,10 +371,12 @@ export class InteractiveElementSelector extends CdpAutomation {
   async clickElementByNumber(elementNumber) {
     const element = this.#mappedElements.get(elementNumber);
     if (!element) {
-      throw new Error(`The element with the number ${elementNumber} was not found.`);
+      throw new Error(
+        `The element with the number ${elementNumber} was not found.`
+      );
     }
     console.log(
-      `⚡️ Выполняем клик по элементу #${elementNumber}: ${element.description}`,
+      `⚡️ Выполняем клик по элементу #${elementNumber}: ${element.description}`
     );
     await this.clickElement(element.selector);
   }
@@ -368,10 +389,12 @@ export class InteractiveElementSelector extends CdpAutomation {
   async typeTextByNumber(elementNumber, text) {
     const element = this.#mappedElements.get(elementNumber);
     if (!element) {
-      throw new Error(`The element with the number ${elementNumber} was not found.`);
+      throw new Error(
+        `The element with the number ${elementNumber} was not found.`
+      );
     }
     console.log(
-      `⌨️ Вводим текст в элемент #${elementNumber}: ${element.description}`,
+      `⌨️ Вводим текст в элемент #${elementNumber}: ${element.description}`
     );
     await this.clickElement(element.selector);
     await this.clearInputField(element.selector);
@@ -384,11 +407,16 @@ export class InteractiveElementSelector extends CdpAutomation {
    * @returns {Promise<Array<Object>>} Массив объектов с информацией о контейнерах.
    */
   async getScrollableContainers(filterBySelector) {
-    console.log(`🔍 Поиск прокручиваемых контейнеров (Фильтр: ${filterBySelector})...`);
-    
-    const query = (filterBySelector && filterBySelector.toUpperCase() !== 'ANY') ? filterBySelector : '*';
+    console.log(
+      `🔍 Поиск прокручиваемых контейнеров (Фильтр: ${filterBySelector})...`
+    );
 
-    const scrollableContainersScript = `
+    const query =
+      filterBySelector && filterBySelector.toUpperCase() !== "ANY"
+        ? filterBySelector
+        : "*";
+
+    const scrollableContainersScript = /* js */ `
       (() => {
         const containers = [];
         const elements = document.querySelectorAll('${query}');
@@ -430,8 +458,11 @@ export class InteractiveElementSelector extends CdpAutomation {
     });
 
     if (result.exceptionDetails) {
-        console.error("❌ Ошибка при выполнении скрипта поиска контейнеров:", result.exceptionDetails.text);
-        return [];
+      console.error(
+        "❌ Ошибка при выполнении скрипта поиска контейнеров:",
+        result.exceptionDetails.text
+      );
+      return [];
     }
     const containers = result.result.value;
     console.log(`✅ Найдено ${containers.length} прокручиваемых контейнеров.`);
@@ -445,7 +476,7 @@ export class InteractiveElementSelector extends CdpAutomation {
   async getPageScrollStatus() {
     console.log("ℹ️ Получаем статус глобальной прокрутки страницы...");
     const scrollStatus = await this.cdpRequest("Runtime.evaluate", {
-      expression: `
+      expression: /* js */ `
         (() => {
           const body = document.body;
           const html = document.documentElement;
@@ -471,7 +502,10 @@ export class InteractiveElementSelector extends CdpAutomation {
     });
 
     if (!scrollStatus || !scrollStatus.result || !scrollStatus.result.value) {
-      console.error("❌ Не удалось получить статус прокрутки страницы:", scrollStatus);
+      console.error(
+        "❌ Не удалось получить статус прокрутки страницы:",
+        scrollStatus
+      );
       return null;
     }
     console.log("✅ Статус глобальной прокрутки получен.");
@@ -486,16 +520,26 @@ export class InteractiveElementSelector extends CdpAutomation {
    * @returns {Promise<string>} Строка в формате Markdown.
    */
   async getPageOverview(
-      includeInteractiveElements = true,
-      includeScrollStatus = true,
-      includeScrollableContainers = true
+    includeInteractiveElements = true,
+    includeScrollStatus = true,
+    includeScrollableContainers = true
   ) {
     console.log("📝 Сбор наблюдений о браузере для LLM...");
 
     let markdownOutput = "# Текущее состояние страницы\n\n";
 
-    const currentUrl = await this.cdpRequest("Runtime.evaluate", { expression: "window.location.href", returnByValue: true }).then(res => res.result.value).catch(() => "N/A");
-    const pageTitle = await this.cdpRequest("Runtime.evaluate", { expression: "document.title", returnByValue: true }).then(res => res.result.value).catch(() => "N/A");
+    const currentUrl = await this.cdpRequest("Runtime.evaluate", {
+      expression: "window.location.href",
+      returnByValue: true,
+    })
+      .then((res) => res.result.value)
+      .catch(() => "N/A");
+    const pageTitle = await this.cdpRequest("Runtime.evaluate", {
+      expression: "document.title",
+      returnByValue: true,
+    })
+      .then((res) => res.result.value)
+      .catch(() => "N/A");
 
     markdownOutput += `## Информация о странице\n- **URL:** ${currentUrl}\n- **Заголовок:** ${pageTitle}\n\n`;
 
@@ -511,7 +555,8 @@ export class InteractiveElementSelector extends CdpAutomation {
     }
 
     if (includeScrollableContainers) {
-      const localScrollableContainers = await this.getScrollableContainers('ANY');
+      const localScrollableContainers =
+        await this.getScrollableContainers("ANY");
       markdownOutput += `## Локальные прокручиваемые контейнеры\n`;
       if (localScrollableContainers.length > 0) {
         localScrollableContainers.forEach((container, index) => {
@@ -523,11 +568,16 @@ export class InteractiveElementSelector extends CdpAutomation {
         markdownOutput += "Локальные прокручиваемые контейнеры не найдены.\n\n";
       }
     }
-    
+
     if (includeInteractiveElements) {
-      const interactiveElementsList = await this.getInteractiveElements('ANY', false);
+      const interactiveElementsList = await this.getInteractiveElements(
+        "ANY",
+        false
+      );
       markdownOutput += `## Интерактивные элементы\n`;
-      markdownOutput += interactiveElementsList || "Элементы не найдены или произошла ошибка.\n";
+      markdownOutput +=
+        interactiveElementsList ||
+        "Элементы не найдены или произошла ошибка.\n";
     }
 
     console.log("✅ Наблюдения для LLM успешно сформированы.");
